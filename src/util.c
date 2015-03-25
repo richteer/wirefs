@@ -21,7 +21,7 @@ int util_format(int diskSizeBytes, char * file_name)
 {
 	int i;
 	int minimumBlocks;
-	inode curr_inode;
+	inode_t curr_inode;
 
 	/* create the virtual disk */
 	if ((virtual_disk = open(file_name, O_CREAT|O_RDWR, S_IRUSR|S_IWUSR)) < 0)

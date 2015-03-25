@@ -122,7 +122,7 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset, struc
 	int i;
 	int read_bytes;
 	int current_bytes;
-	inode inode;
+	inode_t inode;
 	
 	file_struct file;
 	//FUSE Should have called open to check that the file exists ahead of time
@@ -145,7 +145,7 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset, struc
 	write relevent blocks
 */
 static int fs_write(const char * path, const char * buf, size_t buff_size, off_t offset, struct fuse_file_info * fi) {
-	inode inode;
+	inode_t inode;
 	int i;
 	DISK_LBA current_block;	
 	
@@ -158,7 +158,7 @@ static int fs_write(const char * path, const char * buf, size_t buff_size, off_t
 	int new_size = inode.file_size_bytes + buff_size;
 	int new_blockno = floor(new_size/BLOCK_SIZE_BYTES) + 1;
 	
-	if (new_blockno - inode.no_blocks > u_quota()) {
+	if (new_blockno - inode.num_blocks > u_quota()) {
 		return -ENOSPC;
 	}
 	
@@ -174,7 +174,7 @@ static int fs_write(const char * path, const char * buf, size_t buff_size, off_t
    update inode
 */
 static int fs_truncate(const char * path, off_t offset) {
-	inode inode;
+	inode_t inode;
 	int i;
 	int fh;
 	int startblock;
