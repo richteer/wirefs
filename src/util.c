@@ -17,7 +17,7 @@
  * Formats the virtual disk. Saves the superblock
  * bit map and the single level directory.
  */
-int u_format(int diskSizeBytes, char* file_name)
+int util_format(int diskSizeBytes, char * file_name)
 {
 	int i;
 	int minimumBlocks;
@@ -94,7 +94,7 @@ int u_format(int diskSizeBytes, char* file_name)
 
 	curr_inode.free = 1;
 	for (i=0; i< MAX_INODES; i++){
-		write_inode(i, &curr_inode);
+		inode_write(i, &curr_inode);
 	}
 
 	/***********************  SUPERBLOCK ***********************/
@@ -121,14 +121,14 @@ int u_format(int diskSizeBytes, char* file_name)
 
 
 //TODO This is where you recover your filesystem from an unclean shutdown
-int u_fsck() {
+int util_fsck(void) {
 	return 0;
 }
 
 /*
  * Attempts to recover a file system given the virtual disk name
  */
-int recover_file_system(char *file_name)
+int util_recover_fs(char * file_name)
 {
 
 	if ((virtual_disk = open(file_name, O_RDWR)) < 0)
@@ -149,21 +149,21 @@ int recover_file_system(char *file_name)
 	{
 		/* Try to recover your file system */
 		fprintf(stderr, "u_fsck in progress......");
-		if (u_fsck()){
+		if (util_fsck()){
 			fprintf(stderr, "Recovery complete\n");
 			return 1;
-		}else {
+		} else {
 			fprintf(stderr, "Recovery failed\n");
 			return 0;
 		}
 	}
-	else{
+	else {
 		fprintf(stderr, "Clean shutdown detected\n");
 		return 1;
 	}
 }
 
-int u_clean_shutdown()
+int util_clean_shutdown(void)
 {
 	/* write code for cleanly shutting down the file system
 	   return 1 for success, 0 for failure */

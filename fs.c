@@ -153,7 +153,7 @@ static int fs_write(const char * path, const char * buf, size_t buff_size, off_t
 	file_struct file;
 	assert(find_file(path, &file));
 	
-	read_inode(file.inode_number, &inode);
+	inode_read(file.inode_number, &inode);
 	
 	int new_size = inode.file_size_bytes + buff_size;
 	int new_blockno = floor(new_size/BLOCK_SIZE_BYTES) + 1;
@@ -312,11 +312,11 @@ int main(int argc, char **argv)
 	
 	if (do_format) {
 		fprintf(stderr, "Formatting %s (size %i)\n", disk, size_format);
-		u_format(size_format, disk);
+		util_format(size_format, disk);
 		return 0;
 	}
 	
-	recover_file_system(disk);
+	util_recover_fs(disk);
 	//We are not clean
 	sb.clean_shutdown = 0;
 	
@@ -326,7 +326,7 @@ int main(int argc, char **argv)
 	
 	ret = fuse_main(fuse_argc, fuse_argv, &fs_oper, NULL);
 	//We are unmounted. clean shutdown
-	u_clean_shutdown();
+	util_clean_shutdown();
 	
 	free(fuse_argv);
 	return ret;

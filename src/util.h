@@ -1,8 +1,8 @@
 #ifndef U_UTIL
 #define U_UTIL
 
-int u_format(int diskSizeBytes, char* file_name);
-int recover_file_system(char *file_name);
-int u_clean_shutdown();
+int util_format(int, char *);
+int util_recover_fs(char *);
+int util_clean_shutdown(void);
 
 #endif
