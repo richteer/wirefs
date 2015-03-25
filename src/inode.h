@@ -11,17 +11,17 @@
 #include "inode.h"
 #include "userfs.h"
 
-typedef struct i_node{
+typedef struct i_node {
 	int no_blocks;
 	int file_size_bytes;
 	time_t last_modified; // optional add other information
 	DISK_LBA blocks[MAX_BLOCKS_PER_FILE];
 	bool free;
-}inode;
+} inode;
 
 int compute_inode_loc(int);
-int write_inode(int , inode *);
-int read_inode(int , inode *);
+int write_inode(int, inode *);
+int read_inode(int, inode *);
 void allocate_inode(inode *, int, int);
 int free_inode();
 

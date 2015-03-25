@@ -71,7 +71,7 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
 
 	filler(buf, ".", NULL, 0);
 	filler(buf, "..", NULL, 0);
-	/* === TODO Loop through all of the files in the root directory == */
+	/* TODO Loop through all of the files in the root directory */
 	return 0;
 }
 
