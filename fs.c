@@ -237,18 +237,18 @@ static int fs_rename(const char * oldpath, const char * newpath) {
 
 //Creates a structure to tell fuse about the operations we have implemented
 static struct fuse_operations fs_oper = {
-	.getattr	= fs_getattr,
-	.readdir	= fs_readdir,
-	.open		= fs_open,
-	.read		= fs_read,
-	.create	= fs_create,
-	.chown	= fs_chown,
-	.chmod	= fs_chmod,
-	.utimens	= fs_utimens,
-	.truncate	= fs_truncate,
-	.write	= fs_write,
-	.unlink	= fs_unlink,
-	.rename	= fs_rename,
+	.getattr  = fs_getattr,
+	.readdir  = fs_readdir,
+	.open     = fs_open,
+	.read     = fs_read,
+	.create   = fs_create,
+	.chown    = fs_chown,
+	.chmod    = fs_chmod,
+	.utimens  = fs_utimens,
+	.truncate = fs_truncate,
+	.write    = fs_write,
+	.unlink   = fs_unlink,
+	.rename   = fs_rename,
 };
 
 int u_quota() {
