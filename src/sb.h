@@ -17,12 +17,12 @@ typedef struct superblock_s {
 
 	bool clean_shutdown; //if true can assume numFreeBlocks is valid
 
-} superblock;
+} superblock; // I will allow this one.
 
 superblock sb;
 
-int superblockMatchesCode();
-void init_superblock();
+int superblock_matches(void);
+void superblock_int(void);
 
 #endif
 

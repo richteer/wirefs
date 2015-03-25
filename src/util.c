@@ -101,7 +101,7 @@ int util_format(int diskSizeBytes, char * file_name)
 	assert(sizeof(superblock) <= BLOCK_SIZE_BYTES);
 	fprintf(stderr, "%d blocks %d bytes reserved for superblock (%d bytes required)\n", 
 		1, BLOCK_SIZE_BYTES, sizeof(superblock));
-	init_superblock(diskSizeBytes);
+	superblock_init(diskSizeBytes);
 	fprintf(stderr, "userfs will contain %d total blocks: %d free for data\n",
 		sb.disk_size_blocks, sb.num_free_blocks);
 	fprintf(stderr, "userfs contains %d free inodes\n", MAX_INODES);
@@ -141,7 +141,7 @@ int util_recover_fs(char * file_name)
 	read_block(BIT_MAP_BLOCK, bit_map, sizeof(BIT_FIELD)*BIT_MAP_SIZE);
 	read_block(DIRECTORY_BLOCK, &root_dir, sizeof(dir_t));
 
-	if (!superblockMatchesCode()){
+	if (!superblock_matches()){
 		fprintf(stderr,"Unable to recover: userfs appears to have been formatted with another code version\n");
 		return 0;
 	}
