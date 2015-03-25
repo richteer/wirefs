@@ -19,11 +19,11 @@ typedef struct i_node {
 	bool free;
 } inode;
 
-int compute_inode_loc(int);
-int write_inode(int, inode *);
-int read_inode(int, inode *);
-void allocate_inode(inode *, int, int);
-int free_inode();
+int inode_get_location(int);
+int inode_write(int, inode *);
+int inode_read(int, inode *);
+void inode_alloc(inode *, int, int);
+int inode_next();
 
 #endif
 

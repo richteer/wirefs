@@ -7,7 +7,8 @@
 #include "inode.h"
 
 
-int compute_inode_loc(int inode_number) {
+int inode_get_location(int inode_number)
+{
 	int whichInodeBlock;
 	int whichInodeInBlock;
 
@@ -17,11 +18,12 @@ int compute_inode_loc(int inode_number) {
 	return (INODE_BLOCK + whichInodeBlock) *BLOCK_SIZE_BYTES + whichInodeInBlock*sizeof(inode);
 }
 
-int write_inode(int inode_number, inode * in) {
+int inode_write(int inode_number, inode * in)
+{
 	int inodeLocation;
 	assert(inode_number < MAX_INODES);
 
-	inodeLocation = compute_inode_loc(inode_number);
+	inodeLocation = inode_get_location(inode_number);
   	in->last_modified = time(NULL);
 	lseek(virtual_disk, inodeLocation, SEEK_SET);
 	crash_write(virtual_disk, in, sizeof(inode));
@@ -32,11 +34,12 @@ int write_inode(int inode_number, inode * in) {
 }
 
 
-int read_inode(int inode_number, inode * in) {
+int inode_read(int inode_number, inode * in) 
+{
 	int inodeLocation;
 	assert(inode_number < MAX_INODES);
 
-	inodeLocation = compute_inode_loc(inode_number);
+	inodeLocation = inode_get_location(inode_number);
 
   
 	lseek(virtual_disk, inodeLocation, SEEK_SET);
@@ -48,13 +51,13 @@ int read_inode(int inode_number, inode * in) {
 /* TODO
    Sets an inode as allocated
 */
-void allocate_inode(inode * in, int blocks, int size) {
+void inode_alloc(inode * in, int blocks, int size) {
 }
 
 /* TODO
    Returns the next free inode.
 */
-int free_inode() {
+int inode_next() {
 	return -1;
 }
 
