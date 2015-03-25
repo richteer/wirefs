@@ -52,7 +52,7 @@ void inode_alloc(inode_t * in, int blocks, int size)
 {
 	in->num_blocks = blocks;
 	in->file_size_bytes = size;
-	in->free = 0;
+	in->free = false;
 	in->last_modified = time(NULL);
 }
 

@@ -1,6 +1,6 @@
 #Written by Chris Harding
 SHELL   = /bin/bash
-TARGET  = fuserfs
+TARGET  = wirefs
 CC      = gcc
 CFLAGS  = -c
 LDFLAGS = -lm `pkg-config fuse --libs --cflags`
@@ -27,5 +27,17 @@ clean:
 	rm -rf obj
 	rm -rf dep
 	rm -f $(TARGET)
+
+mount: $(TARGET) disk.img
+	./$< --disk disk.img -d test --no-crash
+
+umount:
+	fusermount -u test
+
+format: $(TARGET) disk.img
+	./$< --disk disk.img --format 409600
+
+disk.img:
+	truncate --size 200M disk.img
 
 -include $(DEPS)

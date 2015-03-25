@@ -22,7 +22,7 @@ typedef struct superblock_s {
 superblock sb;
 
 int superblock_matches(void);
-void superblock_int(void);
+void superblock_init(int);
 
 #endif
 

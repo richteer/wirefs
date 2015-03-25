@@ -42,14 +42,25 @@ man errno.h
 static int fs_getattr(const char *path, struct stat *stbuf)
 {
 	int res = 0;
-	
+	file_t * f;	
+
 	memset(stbuf, 0, sizeof(struct stat));
 	if (strcmp(path, "/") == 0) {
 		stbuf->st_mode = S_IFDIR | 0755;
 		stbuf->st_nlink = 2;
 		stbuf->st_mtime = time(NULL);
 		stbuf->st_ctime = time(NULL);
-	} else {
+	}
+	else if (dir_find_file(path, &f)) {
+	// TODO: make this proper
+		fprintf(stderr, "Found file: %s\n", f->file_name);
+		stbuf->st_mode = 0755;
+		stbuf->st_nlink = 1;
+		stbuf->st_mtime = time(NULL);
+		stbuf->st_ctime = time(NULL);
+	}
+	else {
+		fprintf(stderr, "WTFFFFF\n");
 		res = -ENOENT;
 	}
 	
@@ -65,7 +76,7 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
 {
 	(void) offset;
 	(void) fi;
-	file_t * f;
+	int i;
 
 	if (strcmp(path, "/") != 0)
 		return -ENOENT;
@@ -73,9 +84,10 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
 	filler(buf, ".", NULL, 0);
 	filler(buf, "..", NULL, 0);
 	
-	for (f = root_dir.u_file; f + MAX_FILES_PER_DIRECTORY; f++) {
-		if (f->free) continue;
-		filler(buf, f->file_name, NULL, 0);
+	for (i = 0; i < MAX_FILES_PER_DIRECTORY; i++) {
+		if (root_dir.u_file[i].free) continue;
+		fprintf(stderr, "trying to fill '%s'\n", root_dir.u_file[i].file_name);
+		filler(buf, root_dir.u_file[i].file_name, NULL, 0);
 	}
 
 	return 0;
@@ -90,7 +102,10 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
 */
 static int fs_create(const char *path, mode_t mode, struct fuse_file_info * fi)
 {
-	
+	int inum;
+	inode_t in;	
+	file_t * f;
+
 	if(strlen(path) > MAX_FILE_NAME_SIZE) {
 		return -ENAMETOOLONG;
 	}
@@ -98,8 +113,22 @@ static int fs_create(const char *path, mode_t mode, struct fuse_file_info * fi)
 	if(dir_is_full()) {
 		return -1;
 	}
-	
-	
+
+	if (dir_find_file(path, &f)) {
+		return -EEXIST;
+	}	
+
+	inum = inode_next();
+	if (inum == -1) {
+		fprintf(stderr, "~~~ Invalid inode returned ~~~\n");
+		return -1;
+	}
+
+	inode_alloc(&in, 1, 0); // TODO Fix this
+
+	inode_write(inum, &in);
+	dir_allocate_file(inum, path);
+
 	return 0;
 }
 
@@ -229,7 +258,6 @@ static int fs_rename(const char * oldpath, const char * newpath) {
 	
 	if (dir_find_file(oldpath, &file)) {
 		dir_rename_file(oldpath, newpath);
-		/* TODO write blocks */
 		return 0;
 	}
 	return -ENOENT;
@@ -331,6 +359,10 @@ int main(int argc, char **argv)
 		init_crasher();
 	}
 	
+	// TODO: Move this into format?
+	dir_init();
+	dir_write();
+
 	ret = fuse_main(fuse_argc, fuse_argv, &fs_oper, NULL);
 	//We are unmounted. clean shutdown
 	util_clean_shutdown();
