@@ -6,19 +6,19 @@
 
 #include "file.h"
 
-typedef struct dir_struct_s{
-	int no_files;
+typedef struct dir_struct_s {
+	int num_files;
 	file_struct u_file[MAX_FILES_PER_DIRECTORY];
-} dir_struct;
+} dir_t;
 
-void init_dir();
+void dir_init(void);
 void dir_allocate_file(int, const char *);
-void write_dir();
-bool dir_full();
-bool find_file(const char *, file_struct *);
+void dir_write(void);
+bool dir_full(void);
+bool dir_find_file(const char *, file_struct *);
 void dir_remove_file(file_struct);
 void dir_rename_file(const char *, const char *);
 
-dir_struct root_dir;
+dir_t root_dir;
 
 #endif

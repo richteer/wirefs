@@ -88,7 +88,7 @@ static int fs_create(const char *path, mode_t mode, struct fuse_file_info * fi) 
 		return -ENAMETOOLONG;
 	}
 	
-	if(is_dir_full()) {
+	if(dir_is_full()) {
 		return -1;
 	}
 	
@@ -101,7 +101,7 @@ static int fs_open(const char *path, struct fuse_file_info *fi)
 {
 	file_struct file;
 	
-	if (find_file(path, &file)) {
+	if (dir_find_file(path, &file)) {
 		return 0;
 	}
 	return -1;
@@ -126,7 +126,7 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset, struc
 	
 	file_struct file;
 	//FUSE Should have called open to check that the file exists ahead of time
-	assert(find_file(path, &file));
+	assert(dir_find_file(path, &file));
 	read_bytes = 0;
 	
 	return read_bytes;
@@ -151,7 +151,7 @@ static int fs_write(const char * path, const char * buf, size_t buff_size, off_t
 	
 	
 	file_struct file;
-	assert(find_file(path, &file));
+	assert(dir_find_file(path, &file));
 	
 	inode_read(file.inode_number, &inode);
 	
@@ -181,7 +181,7 @@ static int fs_truncate(const char * path, off_t offset) {
 	DISK_LBA current_block;
 	
 	file_struct file;
-	assert(find_file(path, &file));
+	assert(dir_find_file(path, &file));
 	return 0;
 }
 
@@ -190,7 +190,7 @@ static int fs_truncate(const char * path, off_t offset) {
 */
 int fs_unlink(const char * path) {
 	file_struct file;
-	if (find_file(path, &file)) {
+	if (dir_find_file(path, &file)) {
 		dir_remove_file(file);
 		/* TODO write blocks */
 		return 0;
@@ -220,7 +220,7 @@ static int fs_rename(const char * oldpath, const char * newpath) {
 		return -ENAMETOOLONG;
 	}
 	
-	if (find_file(oldpath, &file)) {
+	if (dir_find_file(oldpath, &file)) {
 		dir_rename_file(oldpath, newpath);
 		/* TODO write blocks */
 		return 0;

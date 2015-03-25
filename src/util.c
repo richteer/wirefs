@@ -73,17 +73,17 @@ int util_format(int diskSizeBytes, char * file_name)
 	write_bitmap();
 	
 	/***********************  DIRECTORY  ***********************/
-	assert(sizeof(dir_struct) <= BLOCK_SIZE_BYTES);
+	assert(sizeof(dir_t) <= BLOCK_SIZE_BYTES);
 
 	fprintf(stderr, "%d blocks %d bytes reserved for the userfs directory (%d bytes required)\n", 
-		1, BLOCK_SIZE_BYTES, sizeof(dir_struct));
+		1, BLOCK_SIZE_BYTES, sizeof(dir_t));
 	fprintf(stderr, "\tMax files per directory: %d\n",
 		MAX_FILES_PER_DIRECTORY);
 	fprintf(stderr,"Directory entries limit filesize to %d characters\n",
 		MAX_FILE_NAME_SIZE);
 
-	init_dir();
-	write_dir();
+	dir_init();
+	dir_write();
 
 	/***********************  INODES ***********************/
 	fprintf(stderr, "userfs will contain %d inodes (directory limited to %d)\n",
@@ -139,7 +139,7 @@ int util_recover_fs(char * file_name)
 
 	read_block(SUPERBLOCK_BLOCK, &sb, sizeof(superblock));
 	read_block(BIT_MAP_BLOCK, bit_map, sizeof(BIT_FIELD)*BIT_MAP_SIZE);
-	read_block(DIRECTORY_BLOCK, &root_dir, sizeof(dir_struct));
+	read_block(DIRECTORY_BLOCK, &root_dir, sizeof(dir_t));
 
 	if (!superblockMatchesCode()){
 		fprintf(stderr,"Unable to recover: userfs appears to have been formatted with another code version\n");
