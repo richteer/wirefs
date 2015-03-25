@@ -15,8 +15,8 @@ void dir_init(void);
 void dir_allocate_file(int, const char *);
 void dir_write(void);
 bool dir_full(void);
-bool dir_find_file(const char *, file_t *);
-void dir_remove_file(file_t);
+bool dir_find_file(const char *, file_t **);
+void dir_remove_file(file_t *);
 void dir_rename_file(const char *, const char *);
 
 dir_t root_dir;

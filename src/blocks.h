@@ -3,11 +3,11 @@
 
 #define BLOCK_SIZE_BYTES 4096
 
-void allocate_block(DISK_LBA);
-void free_block(DISK_LBA);
-int find_block();
-void write_block(DISK_LBA, const void *, int);
-void write_block_offset(DISK_LBA block, const void * data, int size, int offset);
-void read_block(DISK_LBA, void *, int);
+void block_alloc(DISK_LBA);
+void block_free(DISK_LBA);
+int block_find();
+void block_write(DISK_LBA, const void *, int);
+void block_write_offset(DISK_LBA block, const void * data, int size, int offset);
+void block_read(DISK_LBA, void *, int);
 
 #endif

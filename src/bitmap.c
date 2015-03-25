@@ -17,5 +17,5 @@ void init_bit_map() {
 }
 
 void write_bitmap() {
-	write_block(BIT_MAP_BLOCK, bit_map, sizeof(BIT_FIELD)*BIT_MAP_SIZE);
+	block_write(BIT_MAP_BLOCK, bit_map, sizeof(BIT_FIELD)*BIT_MAP_SIZE);
 }

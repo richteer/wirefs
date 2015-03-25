@@ -99,7 +99,7 @@ static int fs_create(const char *path, mode_t mode, struct fuse_file_info * fi) 
 /* Checks that a file can be opened */
 static int fs_open(const char *path, struct fuse_file_info *fi)
 {
-	file_t file;
+	file_t * file;
 	
 	if (dir_find_file(path, &file)) {
 		return 0;
@@ -124,7 +124,7 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset, struc
 	int current_bytes;
 	inode_t inode;
 	
-	file_t file;
+	file_t * file;
 	//FUSE Should have called open to check that the file exists ahead of time
 	assert(dir_find_file(path, &file));
 	read_bytes = 0;
@@ -150,10 +150,10 @@ static int fs_write(const char * path, const char * buf, size_t buff_size, off_t
 	DISK_LBA current_block;	
 	
 	
-	file_t file;
+	file_t * file;
 	assert(dir_find_file(path, &file));
 	
-	inode_read(file.inode_number, &inode);
+	inode_read(file->inode_number, &inode);
 	
 	int new_size = inode.file_size_bytes + buff_size;
 	int new_blockno = floor(new_size/BLOCK_SIZE_BYTES) + 1;
@@ -180,7 +180,7 @@ static int fs_truncate(const char * path, off_t offset) {
 	int startblock;
 	DISK_LBA current_block;
 	
-	file_t file;
+	file_t * file;
 	assert(dir_find_file(path, &file));
 	return 0;
 }
@@ -189,7 +189,7 @@ static int fs_truncate(const char * path, off_t offset) {
    Save relevent blocks
 */
 int fs_unlink(const char * path) {
-	file_t file;
+	file_t * file;
 	if (dir_find_file(path, &file)) {
 		dir_remove_file(file);
 		/* TODO write blocks */
@@ -214,7 +214,7 @@ static int fs_utimens(const char * path, const struct timespec tv[2] ) {
 }
 
 static int fs_rename(const char * oldpath, const char * newpath) {
-	file_t file;
+	file_t * file;
 	
 	if(strlen(newpath) > MAX_FILE_NAME_SIZE) {
 		return -ENAMETOOLONG;

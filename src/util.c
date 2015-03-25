@@ -62,12 +62,12 @@ int util_format(int diskSizeBytes, char * file_name)
   
 	/* first three blocks will be taken with the 
 	   superblock, bitmap and directory */
-	allocate_block(BIT_MAP_BLOCK);
-	allocate_block(SUPERBLOCK_BLOCK);
-	allocate_block(DIRECTORY_BLOCK);
+	block_alloc(BIT_MAP_BLOCK);
+	block_alloc(SUPERBLOCK_BLOCK);
+	block_alloc(DIRECTORY_BLOCK);
 	/* next NUM_INODE_BLOCKS will contain inodes */
 	for (i=3; i< 3+NUM_INODE_BLOCKS; i++){
-		allocate_block(i);
+		block_alloc(i);
 	}
   
 	write_bitmap();
@@ -106,7 +106,7 @@ int util_format(int diskSizeBytes, char * file_name)
 		sb.disk_size_blocks, sb.num_free_blocks);
 	fprintf(stderr, "userfs contains %d free inodes\n", MAX_INODES);
 	
-	write_block(SUPERBLOCK_BLOCK, &sb, sizeof(superblock));
+	block_write(SUPERBLOCK_BLOCK, &sb, sizeof(superblock));
 	sync();
 
 
@@ -137,9 +137,9 @@ int util_recover_fs(char * file_name)
 		return 0;
 	}
 
-	read_block(SUPERBLOCK_BLOCK, &sb, sizeof(superblock));
-	read_block(BIT_MAP_BLOCK, bit_map, sizeof(BIT_FIELD)*BIT_MAP_SIZE);
-	read_block(DIRECTORY_BLOCK, &root_dir, sizeof(dir_t));
+	block_read(SUPERBLOCK_BLOCK, &sb, sizeof(superblock));
+	block_read(BIT_MAP_BLOCK, bit_map, sizeof(BIT_FIELD)*BIT_MAP_SIZE);
+	block_read(DIRECTORY_BLOCK, &root_dir, sizeof(dir_t));
 
 	if (!superblock_matches()){
 		fprintf(stderr,"Unable to recover: userfs appears to have been formatted with another code version\n");

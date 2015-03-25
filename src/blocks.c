@@ -10,7 +10,7 @@
 #define BPF BITS_PER_FIELD
 
 //hardinc modified
-void allocate_block(int blockNum)
+void block_alloc(int blockNum)
 {
 	int bit = blockNum & (BPF - 1);
 	int ind = blockNum / BPF;
@@ -20,7 +20,7 @@ void allocate_block(int blockNum)
 }
 
 //hardinc modified
-void free_block(int blockNum)
+void block_free(int blockNum)
 {
 	int bit = blockNum & (BPF - 1);
 	int ind = blockNum / BPF;
@@ -30,7 +30,7 @@ void free_block(int blockNum)
 }
 
 //hardinc modified
-int find_free_block() {
+int block_find_free() {
 	int i,j;
 	
 	// search for bit field with clear bit
@@ -48,16 +48,16 @@ int find_free_block() {
 	return -1;
 }
 
-void write_block(DISK_LBA block, const void * data, int size) {
-	write_block_offset(block, data, size, 0);
+void block_write(DISK_LBA block, const void * data, int size) {
+	block_write_offset(block, data, size, 0);
 }
 
-void write_block_offset(DISK_LBA block, const void * data, int size, int offset) {
+void block_write_offset(DISK_LBA block, const void * data, int size, int offset) {
 	lseek(virtual_disk, BLOCK_SIZE_BYTES * block + offset, SEEK_SET);
 	crash_write(virtual_disk, data, size);
 }
 
-void read_block(DISK_LBA block, void * data, int size) {
+void block_read(DISK_LBA block, void * data, int size) {
 	lseek(virtual_disk, BLOCK_SIZE_BYTES * block, SEEK_SET);
 	read(virtual_disk, data, size);
 }
