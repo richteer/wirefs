@@ -11,7 +11,7 @@
 #include "inode.h"
 #include "userfs.h"
 
-typedef struct i_node {
+typedef struct inode_s {
 	int num_blocks;
 	int file_size_bytes;
 	time_t last_modified; // optional add other information

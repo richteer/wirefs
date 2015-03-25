@@ -65,13 +65,19 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
 {
 	(void) offset;
 	(void) fi;
+	file_t * f;
 
 	if (strcmp(path, "/") != 0)
 		return -ENOENT;
 
 	filler(buf, ".", NULL, 0);
 	filler(buf, "..", NULL, 0);
-	/* TODO Loop through all of the files in the root directory */
+	
+	for (f = root_dir.u_file; f + MAX_FILES_PER_DIRECTORY; f++) {
+		if (f->free) continue;
+		filler(buf, f->file_name, NULL, 0);
+	}
+
 	return 0;
 }
 
@@ -82,7 +88,8 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
    Allocate file as our inode in root dir
    Writes relevent blocks
 */
-static int fs_create(const char *path, mode_t mode, struct fuse_file_info * fi) {
+static int fs_create(const char *path, mode_t mode, struct fuse_file_info * fi)
+{
 	
 	if(strlen(path) > MAX_FILE_NAME_SIZE) {
 		return -ENAMETOOLONG;

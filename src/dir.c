@@ -66,13 +66,18 @@ bool dir_find_file(const char * name, file_t ** file)
 
 void dir_remove_file(file_t * file)
 {
+	int i;
 	inode_t in;
 
 	file->free = true;
 	file->file_name[0] = '\0';
 	inode_read(file->inode_number, &in);
 	in.free = true;
-	// TODO: free the blocks
+
+	for (i = 0; i < MAX_BLOCKS_PER_FILE; i++) {
+		block_free(in.blocks[i]);
+	}
+	
 	inode_write(file->inode_number, &in);
 
 }
