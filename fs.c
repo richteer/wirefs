@@ -283,11 +283,31 @@ int fs_unlink(const char * path) {
 
 //Extra credit
 static int fs_chown(const char * path, uid_t uid, gid_t gid) {
+
+	file_t * f;
+
+	if (!dir_find_file(path, &f)) {
+		return -ENOENT;
+	}
+
+	// TODO: change owners
+
 	return 0;
 }
 
 //Extra credit
 static int fs_chmod(const char * path, mode_t mode) {
+	
+	file_t * f;
+
+	if (!dir_find_file(path, &f)) {
+		return -ENOENT;
+	}
+
+	f->mode = mode;	
+
+	dir_write();
+	
 	return 0;
 }
 
