@@ -267,6 +267,20 @@ static int fs_truncate(const char * path, off_t offset) {
 	
 	file_t * file;
 	assert(dir_find_file(path, &file));
+	inode_read(file->inode_number, &inode);
+
+	inode.file_size_bytes = offset;
+	inode.num_blocks = offset / BLOCK_SIZE_BYTES; // Last block needed
+	inode.num_blocks += (offset == 0) ? 0 : 1;
+
+	for (i = inode.num_blocks; i < inode.num_blocks; i++) {
+		block_free(inode.blocks[i]);
+	}
+
+	inode_write(file->inode_number, &inode);
+
+// TODO: allow forward truncation?
+
 	return 0;
 }
 
