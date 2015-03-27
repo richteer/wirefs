@@ -54,7 +54,7 @@ static int fs_getattr(const char *path, struct stat *stbuf)
 	else if (dir_find_file(path, &f)) {
 	// TODO: make this proper
 		fprintf(stderr, "Found file: %s\n", f->file_name);
-		stbuf->st_mode = 0755;
+		stbuf->st_mode = S_IFREG | 0755;
 		stbuf->st_nlink = 1;
 		stbuf->st_mtime = time(NULL);
 		stbuf->st_ctime = time(NULL);
@@ -87,7 +87,7 @@ static int fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
 	for (i = 0; i < MAX_FILES_PER_DIRECTORY; i++) {
 		if (root_dir.u_file[i].free) continue;
 		fprintf(stderr, "trying to fill '%s'\n", root_dir.u_file[i].file_name);
-		filler(buf, root_dir.u_file[i].file_name, NULL, 0);
+		filler(buf, root_dir.u_file[i].file_name+1, NULL, 0);
 	}
 
 	return 0;
@@ -124,7 +124,7 @@ static int fs_create(const char *path, mode_t mode, struct fuse_file_info * fi)
 		return -1;
 	}
 
-	inode_alloc(&in, 1, 0); // TODO Fix this
+	inode_alloc(&in, 0, 0); // TODO Fix this
 
 	inode_write(inum, &in);
 	dir_allocate_file(inum, path);
@@ -140,6 +140,7 @@ static int fs_open(const char *path, struct fuse_file_info *fi)
 	if (dir_find_file(path, &file)) {
 		return 0;
 	}
+
 	return -1;
 }
 
@@ -184,7 +185,6 @@ static int fs_write(const char * path, const char * buf, size_t buff_size, off_t
 	inode_t inode;
 	int i;
 	DISK_LBA current_block;	
-	
 	
 	file_t * file;
 	assert(dir_find_file(path, &file));
@@ -361,10 +361,11 @@ int main(int argc, char **argv)
 	
 	// TODO: Move this into format?
 	dir_init();
-	dir_write();
+	dir_read();
 
 	ret = fuse_main(fuse_argc, fuse_argv, &fs_oper, NULL);
 	//We are unmounted. clean shutdown
+	fprintf(stderr, "Clean shutting down...\n");
 	util_clean_shutdown();
 	
 	free(fuse_argv);

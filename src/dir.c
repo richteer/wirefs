@@ -8,6 +8,8 @@
 #include "dir.h"
 #include "inode.h"
 
+dir_t root_dir = {0};
+
 bool dir_is_full(void)
 {
 	return root_dir.num_files == MAX_FILES_PER_DIRECTORY;
@@ -34,7 +36,9 @@ void dir_read(void)
 
 void dir_write(void)
 {
+	fprintf(stderr, "writing\n");
 	block_write(DIRECTORY_BLOCK, &root_dir, sizeof(dir_t));
+	fprintf(stderr, "writing again\n");
 }
 
 void dir_allocate_file(int inode, const char * name)
@@ -64,7 +68,7 @@ bool dir_find_file(const char * name, file_t ** file)
 	dir_read();
 
 	for (i = 0; i < MAX_FILES_PER_DIRECTORY; i++) {
-		if (!root_dir.u_file[i].free) continue;
+		if (root_dir.u_file[i].free) continue;
 		if (!strcmp(root_dir.u_file[i].file_name, name)) {
 			*file = &root_dir.u_file[i];
 			return true;

@@ -17,7 +17,7 @@ typedef struct superblock_s {
 
 	bool clean_shutdown; //if true can assume numFreeBlocks is valid
 
-} superblock; // I will allow this one.
+} superblock; // I will allow this one to be not _t
 
 superblock sb;
 

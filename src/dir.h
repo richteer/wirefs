@@ -19,6 +19,6 @@ bool dir_find_file(const char *, file_t **);
 void dir_remove_file(file_t *);
 void dir_rename_file(const char *, const char *);
 
-dir_t root_dir;
+extern dir_t root_dir;
 
 #endif
