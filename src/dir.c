@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <sys/stat.h>
 #include "userfs.h"
 #include "blocks.h"
 #include "file.h"
@@ -54,7 +55,7 @@ void dir_allocate_file(int inode, const char * name)
 	root_dir.u_file[i].free = false;
 	strcpy(root_dir.u_file[i].file_name, name);
 	root_dir.u_file[i].inode_number = inode;
-	
+	root_dir.u_file[i].mode = S_IFREG | 0755;	
 	root_dir.num_files++;
 
 	dir_write();

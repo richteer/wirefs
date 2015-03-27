@@ -58,7 +58,7 @@ static int fs_getattr(const char *path, struct stat *stbuf)
 	// TODO: make this proper
 		inode_read(f->inode_number, &in);
 		fprintf(stderr, "Found file: %s\n", f->file_name);
-		stbuf->st_mode = S_IFREG | 0777;
+		stbuf->st_mode = f->mode;
 		stbuf->st_nlink = 1;
 		stbuf->st_mtime = time(NULL);
 		stbuf->st_ctime = time(NULL);
@@ -133,7 +133,6 @@ static int fs_create(const char *path, mode_t mode, struct fuse_file_info * fi)
 	}
 
 	inode_alloc(&in, 0, 0); // TODO Fix this
-
 	inode_write(inum, &in);
 	dir_allocate_file(inum, path);
 
