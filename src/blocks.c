@@ -30,7 +30,7 @@ void block_free(int blockNum)
 }
 
 //hardinc modified
-int block_find_free() {
+int block_find() {
 	int i,j;
 	
 	// search for bit field with clear bit

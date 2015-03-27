@@ -29,6 +29,8 @@ man errno.h
 #include "src/bitmap.h"
 #include "fs.h"
 
+#define MAX(a,b) ((a<b)?b:a)
+
 /* Sets stbuf's properties based on file path
    man 3 stat
    man stat.h
@@ -43,6 +45,7 @@ static int fs_getattr(const char *path, struct stat *stbuf)
 {
 	int res = 0;
 	file_t * f;	
+	inode_t in;
 
 	memset(stbuf, 0, sizeof(struct stat));
 	if (strcmp(path, "/") == 0) {
@@ -53,11 +56,14 @@ static int fs_getattr(const char *path, struct stat *stbuf)
 	}
 	else if (dir_find_file(path, &f)) {
 	// TODO: make this proper
+		inode_get_location(f->inode_number);
 		fprintf(stderr, "Found file: %s\n", f->file_name);
 		stbuf->st_mode = S_IFREG | 0755;
 		stbuf->st_nlink = 1;
 		stbuf->st_mtime = time(NULL);
 		stbuf->st_ctime = time(NULL);
+		stbuf->st_size = in.file_size_bytes;
+		stbuf->st_blocks = in.num_blocks;
 	}
 	else {
 		fprintf(stderr, "WTFFFFF\n");
@@ -159,12 +165,22 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset, struc
 	int i;
 	int read_bytes;
 	int current_bytes;
+	int off;
 	inode_t inode;
 	
 	file_t * file;
 	//FUSE Should have called open to check that the file exists ahead of time
 	assert(dir_find_file(path, &file));
 	read_bytes = 0;
+	inode_read(file->inode_number, &inode);
+
+	for (i = 0; i < inode.num_blocks; i++) {	
+		fprintf(stderr, "reading from block %d\n", inode.blocks[i]);
+		block_read(inode.blocks[i], buf+read_bytes, MAX(BLOCK_SIZE_BYTES, size-read_bytes));
+		read_bytes += MAX(BLOCK_SIZE_BYTES, size-read_bytes);
+		if (read_bytes == size) break;
+	}
+	fprintf(stderr, "%c %c %c %c\n", buf[0], buf[1], buf[2], buf[3]); 
 	
 	return read_bytes;
 }
@@ -184,23 +200,51 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset, struc
 static int fs_write(const char * path, const char * buf, size_t buff_size, off_t offset, struct fuse_file_info * fi) {
 	inode_t inode;
 	int i;
+	int new_size;
+	int new_blockno;
 	DISK_LBA current_block;	
+	int buf_rem;
+	int wblki;
 	
 	file_t * file;
 	assert(dir_find_file(path, &file));
 	
 	inode_read(file->inode_number, &inode);
-	
-	int new_size = inode.file_size_bytes + buff_size;
-	int new_blockno = floor(new_size/BLOCK_SIZE_BYTES) + 1;
-	
-	if (new_blockno - inode.num_blocks > u_quota()) {
-		return -ENOSPC;
+
+	// Check if we need to resize the file.
+	if (inode.file_size_bytes < buff_size + offset) {
+		new_size = buff_size + offset;
+		new_blockno = floor(new_size/BLOCK_SIZE_BYTES) + 1;
+
+		if (new_blockno - inode.num_blocks > u_quota()) {
+			return -ENOSPC;
+		}
+		
+		if (!valid_file_size(new_blockno)) {
+			return -EFBIG;
+		}
+
+		for (i = inode.num_blocks; i < new_blockno; i++) {
+			inode.blocks[i] = block_find();
+			block_alloc(inode.blocks[i]);
+		}
+
+		inode.file_size_bytes = new_size;
+		inode.num_blocks = new_blockno;
+		inode_write(file->inode_number, &inode);
 	}
 	
-	if (!valid_file_size(new_blockno)) {
-		return -EFBIG;
+	buf_rem = buff_size;
+	wblki = offset / BLOCK_SIZE_BYTES;
+	while (buf_rem > 0) {
+		assert(wblki < inode.num_blocks);
+		fprintf(stderr, "writing to block %d\n", inode.blocks[wblki]);
+		block_write_offset(inode.blocks[wblki], buf + (buff_size-buf_rem), MAX(buf_rem, BLOCK_SIZE_BYTES), offset);
+		wblki++; // Write to the next block on next iteration
+		buf_rem -= BLOCK_SIZE_BYTES;
+		offset = 0; // Only need to write offset once, clear for writes to other blocks
 	}
+
 	return buff_size;
 }
 
