@@ -61,3 +61,9 @@ void block_read(DISK_LBA block, void * data, int size) {
 	lseek(virtual_disk, BLOCK_SIZE_BYTES * block, SEEK_SET);
 	read(virtual_disk, data, size);
 }
+
+
+void block_read_offset(DISK_LBA block, void * data, int size, int offset) {
+	lseek(virtual_disk, BLOCK_SIZE_BYTES * block + offset, SEEK_SET);
+	read(virtual_disk, data, size);
+}

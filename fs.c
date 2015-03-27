@@ -173,14 +173,15 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset, struc
 	assert(dir_find_file(path, &file));
 	read_bytes = 0;
 	inode_read(file->inode_number, &inode);
+	off = offset % BLOCK_SIZE_BYTES; 
 
-	for (i = 0; i < inode.num_blocks; i++) {	
+	for (i = offset/BLOCK_SIZE_BYTES; i < inode.num_blocks; i++) {	
 		fprintf(stderr, "reading from block %d\n", inode.blocks[i]);
-		block_read(inode.blocks[i], buf+read_bytes, MAX(BLOCK_SIZE_BYTES, size-read_bytes));
+		block_read_offset(inode.blocks[i], buf+read_bytes, MAX(BLOCK_SIZE_BYTES, size-read_bytes), off);
 		read_bytes += MAX(BLOCK_SIZE_BYTES, size-read_bytes);
 		if (read_bytes == size) break;
+		off = 0;
 	}
-	fprintf(stderr, "%c %c %c %c\n", buf[0], buf[1], buf[2], buf[3]); 
 	
 	return read_bytes;
 }
