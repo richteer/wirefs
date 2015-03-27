@@ -56,14 +56,16 @@ static int fs_getattr(const char *path, struct stat *stbuf)
 	}
 	else if (dir_find_file(path, &f)) {
 	// TODO: make this proper
-		inode_get_location(f->inode_number);
+		inode_read(f->inode_number, &in);
 		fprintf(stderr, "Found file: %s\n", f->file_name);
-		stbuf->st_mode = S_IFREG | 0755;
+		stbuf->st_mode = S_IFREG | 0777;
 		stbuf->st_nlink = 1;
 		stbuf->st_mtime = time(NULL);
 		stbuf->st_ctime = time(NULL);
 		stbuf->st_size = in.file_size_bytes;
 		stbuf->st_blocks = in.num_blocks;
+		stbuf->st_blksize = BLOCK_SIZE_BYTES;
+		stbuf->st_ino = f->inode_number;
 	}
 	else {
 		fprintf(stderr, "WTFFFFF\n");
@@ -229,6 +231,7 @@ static int fs_write(const char * path, const char * buf, size_t buff_size, off_t
 			inode.blocks[i] = block_find();
 			block_alloc(inode.blocks[i]);
 		}
+
 
 		inode.file_size_bytes = new_size;
 		inode.num_blocks = new_blockno;
