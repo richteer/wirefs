@@ -89,7 +89,7 @@ void dir_remove_file(file_t * file)
 	inode_read(file->inode_number, &in);
 	in.free = true;
 
-	for (i = 0; i < MAX_BLOCKS_PER_FILE; i++) {
+	for (i = 0; i < in.num_blocks; i++) {
 		block_free(in.blocks[i]);
 	}
 	
