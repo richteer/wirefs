@@ -66,6 +66,8 @@ static int fs_getattr(const char *path, struct stat *stbuf)
 		stbuf->st_blocks = in.num_blocks;
 		stbuf->st_blksize = BLOCK_SIZE_BYTES;
 		stbuf->st_ino = f->inode_number;
+		stbuf->st_uid = f->uid;
+		stbuf->st_gid = f->gid;
 	}
 	else {
 		fprintf(stderr, "WTFFFFF\n");
@@ -290,7 +292,10 @@ static int fs_chown(const char * path, uid_t uid, gid_t gid) {
 		return -ENOENT;
 	}
 
-	// TODO: change owners
+	f->uid = uid;
+	f->gid = gid;
+
+	dir_write();
 
 	return 0;
 }
